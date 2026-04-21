@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación Kick - Reingeniería</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            /* 1. Forzar el fondo oscuro exacto en todo el documento */
+            body, html, #slides-container {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                background-color: #0f1115 !important;
+            }
+            
+            /* 2. Mostrar TODAS las diapositivas y separar cada una en una página nueva */
+            .slide {
+                display: flex !important;
+                page-break-inside: avoid !important;
+                page-break-after: always !important;
+                height: 100vh !important;
+                background-color: #0f1115 !important;
+                opacity: 1 !important; /* Quita el efecto de animación al imprimir */
+                padding: 0 !important;
+            }
+
+            /* 3. Ocultar la barra de progreso, los botones y las notas para que no salgan en el PDF */
+            #progress-bar, #notes-container, .absolute.bottom-6.right-6 {
+                display: none !important;
+            }
+        }
+        
+        /* Paleta de colores de Kick.com */
+        :root {
+            --kick-green: #53fc18;
+            --kick-dark: #0f1115;
+            --kick-gray: #24272c;
+            --kick-light: #f1f1f1;
+        }
+        body {
+            background-color: var(--kick-dark);
+            color: var(--kick-light);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            overflow: hidden; /* Evita scroll en la presentación completa */
+        }
+        .slide {
+            display: none;
+            height: 100vh;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+            animation: fadeIn 0.4s ease-in-out;
+            position: relative;
+        }
+        .slide.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .text-kick { color: var(--kick-green); }
+        .bg-kick { background-color: var(--kick-green); }
+        .border-kick { border-color: var(--kick-green); }
+        
+        .slide-content {
+            max-width: 1000px;
+            width: 100%;
+        }
+        
+        /* Estilos de lista personalizados */
+        ul.custom-list {
+            list-style: none;
+            padding: 0;
+        }
+        ul.custom-list li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 1.125rem;
+            color: #d1d5db;
+        }
+        ul.custom-list li::before {
+            content: "▹";
+            position: absolute;
+            left: 0;
+            color: var(--kick-green);
+            font-weight: bold;
+        }
+        
+        /* Contenedor de Notas */
+        #notes-container {
+            transition: transform 0.3s ease-in-out;
+            transform: translateY(100%);
+        }
+        #notes-container.open {
+            transform: translateY(0);
+        }
+        
+        /* Modal para imagen ampliada */
+        #image-modal {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        #image-modal.hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="relative h-screen w-screen selection:bg-[#53fc18] selection:text-black">
+
+    <!-- Indicador de progreso -->
+    <div class="absolute top-0 left-0 h-1 bg-kick transition-all duration-300 z-50" id="progress-bar" style="width: 10%;"></div>
+
+    <!-- DIAPOSITIVAS -->
+    <div id="slides-container">
+        
+        <!-- Diapositiva 1 -->
+        <div class="slide active" data-notes="Saludar a la clase y al profesor. Presentar al equipo brevemente y mencionar que van a analizar Kick.com, una plataforma que está desafiando a Twitch.">
+            <div class="slide-content text-center">
+                <div class="inline-block px-4 py-1 rounded-full border border-kick text-kick text-sm font-bold mb-6 tracking-widest uppercase">
+                    Taller Práctico
+                </div>
+                
+                <!-- Logo de Kick añadido -->
+                <img src="C:/Users/javi3/OneDrive/Escritorio/kick.webp" alt="" class="h-16 md:h-20 mx-auto mb-6 drop-shadow-[0_0_15px_rgba(83,252,24,0.5)]">
+                
+                <h1 class="text-5xl md:text-6xl font-extrabold mb-4 text-white">Reingeniería de Procesos</h1>
+                <h2 class="text-3xl md:text-4xl text-kick mb-12">e Integración de Nuevas Tecnologías</h2>
+                
+                <div class="bg-[#1a1d24] p-8 rounded-xl max-w-2xl mx-auto border border-[#2a2d34] text-left">
+                    <p class="text-xl mb-2"><span class="font-bold text-white">Caso de Estudio:</span> Kick.com</p>
+                    <p class="text-gray-400 mb-6 text-sm">Construcción y Evolución del Software – GR2SW | Abril 2026</p>
+                    <p class="text-gray-400 mb-6 text-sm">GRUPO 03</p>
+                    
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <p class="text-kick font-bold mb-1">Integrantes:</p>
+                            <p>Elian Caizapanta</p>
+                            <p>Brandon Pallo</p>
+                            <p>Fernanda Rueda</p>
+                        </div>
+                        <div>
+                            <p class="text-kick font-bold mb-1">Docente:</p>
+                            <p>MSc. Adrián Eguez</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diapositiva 2 -->
+        <div class="slide" data-notes="Explicar que el éxito rápido de Kick ha revelado fallas en su software. Seleccionamos estos dos procesos porque son críticos para la retención de usuarios y creadores.">
+            <div class="slide-content">
+                <h2 class="text-4xl font-bold text-white mb-8 border-l-4 border-kick pl-4">Introducción al Reto</h2>
+                
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h3 class="text-2xl text-kick mb-4">App: Kick.com</h3>
+                        <ul class="custom-list">
+                            <li><strong>¿Qué es?</strong> Plataforma de streaming en vivo (lanzada en 2023).</li>
+                            <li><strong>Propuesta de valor:</strong> División de ingresos 95/5 a favor del creador (competencia de Twitch).</li>
+                            <li><strong class="text-red-400">El Reto:</strong> La plataforma creció muy rápido, pero sus procesos internos no escalan.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-[#1a1d24] p-8 rounded-xl border border-[#2a2d34]">
+                        <h3 class="text-xl text-white font-bold mb-4 flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-kick" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            Procesos a Rediseñar
+                        </h3>
+                        <ol class="list-decimal list-inside space-y-3 text-lg text-gray-300">
+                            <li class="pl-2">Sistema de Moderación de Chat en Vivo.</li>
+                            <li class="pl-2">Sistema de Descubrimiento y Recomendación de Canales.</li>
+                        </ol>
+                        
+                        <!-- Imagen de Setup de Streaming -->
+                        <img src="img/kickLogo.png" alt="" class="w-full h-40 object-cover rounded-lg mt-6 border border-[#3a3d44] shadow-lg">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diapositiva 3 -->
+        <div class="slide" data-notes="Enfatizar el problema de la velocidad. Un chat de un evento grande se mueve tan rápido que el ojo humano no lo procesa, dejando mensajes tóxicos visibles por mucho tiempo.">
+            <div class="slide-content">
+                <div class="text-kick font-bold tracking-widest uppercase mb-2 text-sm">Proceso 1 (As-Is)</div>
+                <h2 class="text-4xl font-bold text-white mb-8 border-l-4 border-kick pl-4">Moderación de Chat: Diagnóstico</h2>
+                
+                <div class="bg-red-900/20 border border-red-500/30 p-6 rounded-xl mb-8">
+                    <p class="text-lg"><strong class="text-white">Funcionamiento actual:</strong> Manual y reactivo. Depende de moderadores ("mods") humanos voluntarios usando baneos manuales, timeouts y filtros básicos de palabras clave.</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2">
+                        <h3 class="text-2xl text-white mb-4">Cuellos de Botella Actuales</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="bg-[#1a1d24] p-5 rounded-lg border-l-2 border-red-500">
+                                <span class="text-xl">❌</span> <strong class="text-white">Nula escalabilidad:</strong> Imposible leer todo en streams con miles de usuarios.
+                            </div>
+                            <div class="bg-[#1a1d24] p-5 rounded-lg border-l-2 border-red-500">
+                                <span class="text-xl">❌</span> <strong class="text-white">Dependencia humana:</strong> Si el mod duerme, el chat queda desprotegido.
+                            </div>
+                            <div class="bg-[#1a1d24] p-5 rounded-lg border-l-2 border-red-500">
+                                <span class="text-xl">❌</span> <strong class="text-white">Falta de contexto:</strong> Los filtros bloquean palabras, no intenciones (falsos positivos).
+                            </div>
+                            <div class="bg-[#1a1d24] p-5 rounded-lg border-l-2 border-red-500">
+                                <span class="text-xl">❌</span> <strong class="text-white">Carga excesiva:</strong> Creadores pequeños tienen que jugar y moderar al mismo tiempo.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:col-span-1 flex flex-col justify-center">
+                        <img src="img/chatKick.png" alt="" class="w-full h-full max-h-64 object-cover rounded-xl border border-[#3a3d44] opacity-80 hover:opacity-100 transition-opacity shadow-lg">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diapositiva 4 -->
+        <div class="slide" data-notes="Esta es la parte técnica fuerte. Mencionar que ya no es un filtro de texto básico, sino un ecosistema donde la IA entiende el sarcasmo y la jerga gamer.">
+            <div class="slide-content">
+                <div class="text-kick font-bold tracking-widest uppercase mb-2 text-sm">Proceso 1 (To-Be)</div>
+                <h2 class="text-4xl font-bold text-white mb-8 border-l-4 border-kick pl-4">Reingeniería: IA Multi-Agente</h2>
+                
+                <p class="text-xl mb-6 text-gray-300">Dejamos de depender del humano como primer filtro y pasamos a una <strong class="text-kick">arquitectura de IA de 4 capas:</strong></p>
+
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-start p-4 bg-[#1a1d24] rounded-lg">
+                        <div class="bg-kick text-black font-bold w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 mr-4">1</div>
+                        <div><strong class="text-white">Agente Semántico (LLM fine-tuned):</strong> Analiza intención y contexto del mensaje en &lt;50ms.</div>
+                    </div>
+                    <div class="flex items-start p-4 bg-[#1a1d24] rounded-lg">
+                        <div class="bg-kick text-black font-bold w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 mr-4">2</div>
+                        <div><strong class="text-white">Agente de Perfilado:</strong> Revisa el historial del usuario (Redis) para ver si es reincidente.</div>
+                    </div>
+                    <div class="flex items-start p-4 bg-[#1a1d24] rounded-lg">
+                        <div class="bg-kick text-black font-bold w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 mr-4">3</div>
+                        <div><strong class="text-white">Agente Orquestador:</strong> Toma la decisión (Aprobar, Timeout de 10 min, o Bloqueo).</div>
+                    </div>
+                    <div class="flex items-start p-4 bg-[#1a1d24] rounded-lg">
+                        <div class="bg-kick text-black font-bold w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 mr-4">4</div>
+                        <div><strong class="text-white">Panel de Supervisión:</strong> Los humanos solo revisan los "casos ambiguos".</div>
+                    </div>
+                </div>
+                
+                <div class="inline-block bg-blue-900/20 border border-blue-500/30 text-blue-300 px-4 py-2 rounded-lg text-sm">
+                    <strong>Infraestructura:</strong> Apache Kafka (streams veloces), LLM en AWS/GCP (Auto-scaling).
+                </div>
+            </div>
+        </div>
+
+        <!-- Diapositiva 5 -->
+        <div class="slide" data-notes="Usar el diagrama para mostrar cómo el usuario escribe, pasa por Kafka, los agentes deciden y el moderador humano solo entra al final si el score es 'medio/ambiguo'.">
+            <div class="slide-content">
+                <div class="text-kick font-bold tracking-widest uppercase mb-2 text-sm">Proceso 1 (Flujo y Resultados)</div>
+                <h2 class="text-4xl font-bold text-white mb-6 border-l-4 border-kick pl-4">Flujo y Beneficios</h2>
+                
+                <div class="flex flex-col md:flex-row gap-8 items-center md:items-start">
+                    <!-- Placeholder de Imagen -->
+                    <div class="inline-block bg-[#1a1d24] border-2 border-dashed border-[#3a3d44] rounded-xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0" id="slide5-image-container">
+                        <img src="img/flujoProceso1.png" alt="" class="max-w-md h-auto" id="slide5-image">
+                    </div>
+
+                    <div>
+                        <h3 class="text-2xl text-white mb-4">Impacto Logrado</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-center"><span class="text-2xl mr-3">🚀</span> <span><strong class="text-kick">Escalabilidad Total:</strong> Soporta miles de mensajes por segundo.</span></li>
+                            <li class="flex items-center"><span class="text-2xl mr-3">⚡</span> <span><strong class="text-kick">Tiempo de respuesta:</strong> De minutos (manual) a milisegundos (automático).</span></li>
+                            <li class="flex items-center"><span class="text-2xl mr-3">🛡️</span> <span><strong class="text-kick">Protección 24/7:</strong> Ideal para streamers pequeños sin equipo de moderación.</span></li>
+                            <li class="flex items-center"><span class="text-2xl mr-3">🎯</span> <span><strong class="text-kick">Precisión:</strong> Reducción del ~70% en falsos positivos gracias al contexto.</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diapositiva 6 -->
+        <div class="slide" data-notes="Hacer la comparación con Netflix o TikTok. Si TikTok mostrara el mismo video a todos, fracasaría. Kick hace exactamente eso hoy en día.">
+            <div class="slide-content">
+                <div class="text-kick font-bold tracking-widest uppercase mb-2 text-sm">Proceso 2 (As-Is)</div>
+                <h2 class="text-4xl font-bold text-white mb-8 border-l-4 border-kick pl-4">Recomendación de Canales: Diagnóstico</h2>
+                
+                <div class="bg-red-900/20 border border-red-500/30 p-6 rounded-xl mb-8">
+                    <p class="text-lg"><strong class="text-white">Funcionamiento actual:</strong> Listado ordenado de mayor a menor número de espectadores (viewers). Búsqueda manual por categorías.</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2">
+                        <h3 class="text-2xl text-white mb-4">Cuellos de Botella Actuales</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="bg-[#1a1d24] p-5 rounded-lg border-l-2 border-red-500">
+                                <span class="text-xl">❌</span> <strong class="text-white">"Rich get richer":</strong> El que tiene 10,000 viewers siempre sale primero. El streamer pequeño es invisible.
+                            </div>
+                            <div class="bg-[#1a1d24] p-5 rounded-lg border-l-2 border-red-500">
+                                <span class="text-xl">❌</span> <strong class="text-white">Cero personalización:</strong> Todos los usuarios ven la misma página de inicio.
+                            </div>
+                            <div class="bg-[#1a1d24] p-5 rounded-lg border-l-2 border-red-500">
+                                <span class="text-xl">❌</span> <strong class="text-white">Sin contexto:</strong> La plataforma no sabe si tienes 10 minutos libres o 4 horas.
+                            </div>
+                            <div class="bg-[#1a1d24] p-5 rounded-lg border-l-2 border-red-500">
+                                <span class="text-xl">❌</span> <strong class="text-white">Baja retención:</strong> Si no encuentras algo rápido, cierras la app.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:col-span-1 flex flex-col justify-center">
+                        <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=500&q=80" alt="" class="w-full h-full max-h-64 object-cover rounded-xl border border-[#3a3d44] opacity-80 hover:opacity-100 transition-opacity shadow-lg">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diapositiva 7 -->
+        <div class="slide" data-notes="Destacar el 'Diversity Injection'. Es la solución técnica al problema comercial de Kick para atraer nuevos creadores que huyen de Twitch.">
+            <div class="slide-content">
+                <div class="text-kick font-bold tracking-widest uppercase mb-2 text-sm">Proceso 2 (To-Be)</div>
+                <h2 class="text-4xl font-bold text-white mb-8 border-l-4 border-kick pl-4">Reingeniería: IA Contextual</h2>
+                
+                <p class="text-xl mb-6 text-gray-300">Transformación Técnica: <strong class="text-kick">Motor Híbrido con IA Contextual.</strong></p>
+
+                <div class="grid md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-[#1a1d24] p-6 rounded-xl border border-[#2a2d34]">
+                        <div class="w-10 h-10 bg-kick text-black rounded-lg flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                        </div>
+                        <h4 class="font-bold text-white mb-2">Motor de Embeddings (Pinecone)</h4>
+                        <p class="text-sm text-gray-400">Transforma canales y gustos en "vectores" para buscar similitudes matemáticas ultrarrápidas.</p>
+                    </div>
+                    
+                    <div class="bg-[#1a1d24] p-6 rounded-xl border border-[#2a2d34]">
+                        <div class="w-10 h-10 bg-kick text-black rounded-lg flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <h4 class="font-bold text-white mb-2">Agente Contextual LLM</h4>
+                        <p class="text-sm text-gray-400">Analiza la hora del día, el día de la semana y tu tiempo promedio de sesión.</p>
+                    </div>
+
+                    <div class="bg-[#1a1d24] p-6 rounded-xl border border-[#2a2d34]">
+                        <div class="w-10 h-10 bg-kick text-black rounded-lg flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <h4 class="font-bold text-white mb-2">Diversity Injection</h4>
+                        <p class="text-sm text-gray-400">El algoritmo obliga a que el 30% de las recomendaciones sean canales pequeños (&lt;500 viewers) compatibles contigo.</p>
+                    </div>
+                </div>
+                
+                <div class="inline-block bg-blue-900/20 border border-blue-500/30 text-blue-300 px-4 py-2 rounded-lg text-sm">
+                    <strong>Infraestructura:</strong> Apache Flink (eventos en tiempo real), Pinecone (Base de datos vectorial).
+                </div>
+            </div>
+        </div>
+
+        <!-- Diapositiva 8 -->
+        <div class="slide" data-notes="Explicar brevemente cómo el vector del usuario cambia en tiempo real con Apache Flink si se queda viendo un stream o si lo abandona rápido.">
+            <div class="slide-content">
+                <div class="text-kick font-bold tracking-widest uppercase mb-2 text-sm">Proceso 2 (Flujo y Resultados)</div>
+                <h2 class="text-4xl font-bold text-white mb-6 border-l-4 border-kick pl-4">Flujo y Beneficios</h2>
+                
+                <div class="flex flex-col md:flex-row gap-8 items-start">
+                    <div class="flex-1">
+                        <h3 class="text-2xl text-white mb-4">Impacto Logrado</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-center"><span class="text-2xl mr-3">👤</span> <span><strong class="text-kick">Personalización Real:</strong> Homepage única para cada usuario.</span></li>
+                            <li class="flex items-center"><span class="text-2xl mr-3">📈</span> <span><strong class="text-kick">Aumento de Retención:</strong> Incremento estimado del 30-50% en tiempo de sesión.</span></li>
+                            <li class="flex items-center"><span class="text-2xl mr-3">⚖️</span> <span><strong class="text-kick">Democratización:</strong> Canales pequeños de calidad por fin son descubiertos.</span></li>
+                            <li class="flex items-center"><span class="text-2xl mr-3">🤝</span> <span><strong class="text-kick">Comunidades:</strong> Conecta a usuarios con los mismos nichos y gustos.</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- Placeholder de Imagen -->
+                    <div class="inline-block bg-[#1a1d24] border-2 border-dashed border-[#3a3d44] rounded-xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0" id="slide8-image-container">
+                        <img src="img/flujoProceso2.png" alt="" class="max-w-md h-auto" id="slide8-image">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diapositiva 9 -->
+        <div class="slide" data-notes="Mostrar cómo ambos sistemas rediseñados conviven en la misma infraestructura Cloud sin interrumpir la transmisión de video del usuario.">
+            <div class="slide-content text-center">
+                <div class="text-kick font-bold tracking-widest uppercase mb-2 text-sm">Arquitectura Consolidada</div>
+                <h2 class="text-4xl font-bold text-white mb-6">Arquitectura de Alto Nivel</h2>
+                
+                 <!-- Placeholder de Imagen -->
+                <div class="inline-block bg-[#1a1d24] border-2 border-dashed border-[#3a3d44] rounded-xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity" id="slide9-image-container">
+                    <img src="img/arquitectura.png" alt="" class="max-w-4xl h-auto" id="slide9-image">
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-4 text-left">
+                    <div class="bg-gray-800/50 p-4 rounded-lg">
+                        <strong class="text-kick block mb-1">Event-Driven:</strong>
+                        <span class="text-sm text-gray-300">Todo se mueve a través de Kafka y Flink.</span>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-lg">
+                        <strong class="text-kick block mb-1">Decisiones en el Borde:</strong>
+                        <span class="text-sm text-gray-300">Redis y Pinecone garantizan latencias mínimas.</span>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-lg">
+                        <strong class="text-kick block mb-1">IA como Servicio:</strong>
+                        <span class="text-sm text-gray-300">Agentes LLM orquestando la lógica pesada sin saturar el Frontend.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diapositiva 10 -->
+        <div class="slide" data-notes="Cerrar con fuerza. Recordar a la clase que la reingeniería de software moderna ya no es solo cambiar bases de datos, sino integrar IA para resolver problemas de negocio.">
+            <div class="slide-content text-center">
+                <h2 class="text-5xl font-extrabold text-kick mb-8">Conclusión</h2>
+                
+                <div class="max-w-3xl mx-auto space-y-6 text-xl text-left">
+                    <div class="bg-[#1a1d24] p-6 rounded-xl border-l-4 border-kick">
+                        <p class="text-white">No reconstruimos Kick desde cero; <strong class="text-kick">transformamos dos puntos críticos</strong> con tecnología actual.</p>
+                    </div>
+                    
+                    <div class="bg-[#1a1d24] p-6 rounded-xl border-l-4 border-white">
+                        <p class="text-gray-300">Pasamos de procesos manuales y rudimentarios, a sistemas <strong class="text-white">autónomos, escalables y contextuales</strong>.</p>
+                    </div>
+                    
+                    <div class="bg-blue-900/20 p-6 rounded-xl border border-blue-500/30 flex items-center justify-between gap-4">
+                        <div>
+                            <h4 class="text-blue-400 font-bold mb-2 uppercase text-sm tracking-wider">Ventaja Competitiva</h4>
+                            <p class="text-white">Atacamos el talón de Aquiles de Kick vs. Twitch: <strong class="text-blue-300">Escalar agresivamente sin que la comunidad se vuelva tóxica</strong> y dando oportunidad real a nuevos creadores.</p>
+                        </div>
+                        <!-- Logo discreto en la conclusión -->
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/d/d4/Kick_logo.svg" alt="" class="h-10 hidden md:block opacity-60">
+                    </div>
+                </div>
+
+                <h3 class="text-3xl text-white font-bold mt-12">¡Gracias! ¿Preguntas?</h3>
+            </div>
+        </div>
+
+    </div> <!-- Fin slides -->
+
+    <!-- Modal para visualizar imagen ampliada -->
+    <div id="image-modal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center cursor-pointer" onclick="closeImageModal()">
+        <img id="modal-image" src="" alt="" class="max-w-[90vw] max-h-[90vh] object-contain">
+    </div>
+
+    <!-- Panel de Notas del Expositor -->
+    <div id="notes-container" class="absolute bottom-0 left-0 w-full bg-[#0a0c0f] border-t-2 border-kick p-4 shadow-[0_-10px_30px_rgba(0,0,0,0.8)] z-40">
+        <div class="max-w-4xl mx-auto flex gap-4 items-start">
+            <div class="bg-kick text-black p-2 rounded shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
+            </div>
+            <div>
+                <h4 class="text-kick text-sm font-bold uppercase tracking-wider mb-1">Notas del Expositor</h4>
+                <p id="notes-text" class="text-lg text-gray-200">Aquí aparecerán tus notas...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Controles de Navegación UI -->
+    <div class="absolute bottom-6 right-6 flex items-center gap-3 z-50">
+        <span id="slide-counter" class="text-gray-400 font-mono text-sm mr-2">1 / 10</span>
+        
+        <button id="toggle-notes" class="bg-[#1a1d24] hover:bg-[#2a2d34] text-gray-300 border border-[#3a3d44] p-3 rounded-lg transition-colors flex items-center justify-center group" title="Mostrar/Ocultar Notas (Tecla 'N')">
+            <svg class="w-5 h-5 group-hover:text-kick transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        </button>
+
+        <button id="prev-btn" class="bg-[#1a1d24] hover:bg-kick hover:text-black hover:border-kick text-white border border-[#3a3d44] p-3 rounded-lg transition-all flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+        
+        <button id="next-btn" class="bg-[#1a1d24] hover:bg-kick hover:text-black hover:border-kick text-white border border-[#3a3d44] p-3 rounded-lg transition-all flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+    </div>
+
+    <!-- Script de lógica de presentación -->
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const counter = document.getElementById('slide-counter');
+        const progressBar = document.getElementById('progress-bar');
+        const notesContainer = document.getElementById('notes-container');
+        const toggleNotesBtn = document.getElementById('toggle-notes');
+        const notesText = document.getElementById('notes-text');
+        
+        let currentSlideIndex = 0;
+        let notesVisible = false;
+
+        function updateSlide() {
+            // Ocultar todas
+            slides.forEach(slide => slide.classList.remove('active'));
+            
+            // Mostrar actual
+            slides[currentSlideIndex].classList.add('active');
+            
+            // Actualizar UI
+            counter.innerText = `${currentSlideIndex + 1} / ${slides.length}`;
+            progressBar.style.width = `${((currentSlideIndex + 1) / slides.length) * 100}%`;
+            
+            // Actualizar Notas
+            const currentNotes = slides[currentSlideIndex].getAttribute('data-notes');
+            notesText.innerText = currentNotes ? currentNotes : "No hay notas para esta diapositiva.";
+            
+            // Estado de botones
+            prevBtn.style.opacity = currentSlideIndex === 0 ? '0.3' : '1';
+            prevBtn.style.cursor = currentSlideIndex === 0 ? 'not-allowed' : 'pointer';
+            
+            nextBtn.style.opacity = currentSlideIndex === slides.length - 1 ? '0.3' : '1';
+            nextBtn.style.cursor = currentSlideIndex === slides.length - 1 ? 'not-allowed' : 'pointer';
+        }
+
+        function nextSlide() {
+            if (currentSlideIndex < slides.length - 1) {
+                currentSlideIndex++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlideIndex > 0) {
+                currentSlideIndex--;
+                updateSlide();
+            }
+        }
+
+        function toggleNotes() {
+            notesVisible = !notesVisible;
+            if (notesVisible) {
+                notesContainer.classList.add('open');
+                toggleNotesBtn.classList.add('bg-kick', 'text-black', 'border-kick');
+                toggleNotesBtn.classList.remove('bg-[#1a1d24]', 'text-gray-300', 'border-[#3a3d44]');
+            } else {
+                notesContainer.classList.remove('open');
+                toggleNotesBtn.classList.remove('bg-kick', 'text-black', 'border-kick');
+                toggleNotesBtn.classList.add('bg-[#1a1d24]', 'text-gray-300', 'border-[#3a3d44]');
+            }
+        }
+
+        // Event Listeners
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+        toggleNotesBtn.addEventListener('click', toggleNotes);
+
+        // Teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            } else if (e.key === 'n' || e.key === 'N') {
+                toggleNotes();
+            }
+        });
+
+        // Click en pantalla avanza (si no es un botón)
+        document.body.addEventListener('click', (e) => {
+            if(e.target.tagName !== 'BUTTON' && !e.target.closest('button') && !e.target.closest('#notes-container')) {
+                // Comentado para evitar saltos accidentales, pero útil si se quiere
+                // nextSlide();
+            }
+        });
+
+        // Inicializar
+        updateSlide();
+
+        // Funcionalidad de Modal para imagen ampliada (Diapositivas 5, 8 y 9)
+        const imageModal = document.getElementById('image-modal');
+        const modalImage = document.getElementById('modal-image');
+
+        // Configurar diapositiva 5
+        const slide5ImageContainer = document.getElementById('slide5-image-container');
+        const slide5Image = document.getElementById('slide5-image');
+        if (slide5ImageContainer && slide5Image) {
+            slide5ImageContainer.addEventListener('click', (e) => {
+                e.stopPropagation();
+                modalImage.src = slide5Image.src;
+                imageModal.classList.remove('hidden');
+            });
+        }
+
+        // Configurar diapositiva 8
+        const slide8ImageContainer = document.getElementById('slide8-image-container');
+        const slide8Image = document.getElementById('slide8-image');
+        if (slide8ImageContainer && slide8Image) {
+            slide8ImageContainer.addEventListener('click', (e) => {
+                e.stopPropagation();
+                modalImage.src = slide8Image.src;
+                imageModal.classList.remove('hidden');
+            });
+        }
+
+        // Configurar diapositiva 9
+        const slide9ImageContainer = document.getElementById('slide9-image-container');
+        const slide9Image = document.getElementById('slide9-image');
+        if (slide9ImageContainer && slide9Image) {
+            slide9ImageContainer.addEventListener('click', (e) => {
+                e.stopPropagation();
+                modalImage.src = slide9Image.src;
+                imageModal.classList.remove('hidden');
+            });
+        }
+
+        function closeImageModal() {
+            imageModal.classList.add('hidden');
+        }
+
+        // Permitir cerrar el modal con la tecla Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !imageModal.classList.contains('hidden')) {
+                closeImageModal();
+            }
+        });
+    </script>
+</body>
+</html>
